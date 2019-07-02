@@ -28,10 +28,19 @@ typedef struct {
    } prev_run;
 } Efl_Ui_List_Position_Manager_Data;
 
+/*
+ * The here used cache is a sum map
+ * Every element in the cache contains the sum of the previous element, and the size of the current item
+ * This is usefull as a lookup of all previous items is O(1).
+ * The tradeoff that makes the cache performant here is, that we only need to walk the whole list of items once in the beginning.
+ * Every other walk of the items is at max the maximum number of items you get into the maximum distance between the average item size and a actaul item size.
+ */
+
 static void
 cache_require(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
 {
    unsigned int i;
+
    if (pd->size_cache) return;
 
    if (pd->size == 0)
@@ -151,19 +160,26 @@ position_content(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
         relevant_viewport = pd->viewport.w;
      }
 
+   //based on the average item size, we jump somewhere into the sum cache.
+   //After beeing in there, we are walking back, until we have less space then viewport size
    start_id = relevant_space_size / pd->average_item_size;
-
    for (; cache_access(obj, pd, start_id) >= relevant_space_size && start_id > 0; start_id --) { }
+
+   //starting on the start id, we are walking down until the sum of elements is bigger than the lower part of the viewport.
    end_id = start_id;
    for (; end_id <= pd->size && cache_access(obj, pd, end_id) <= relevant_space_size + relevant_viewport ; end_id ++) { }
    end_id = MIN(end_id, pd->size);
    end_id = MAX(end_id, start_id + 1);
 
-   //printf("space_size %d : starting point : %d : cached_space_starting_point %d end point : %d cache_space_end_point %d\n", space_size.h, start_id, pd->size_cache[start_id], end_id, pd->size_cache[end_id]);
+   #ifdef DEBUG
+   printf("space_size %d : starting point : %d : cached_space_starting_point %d end point : %d cache_space_end_point %d\n", space_size.h, start_id, pd->size_cache[start_id], end_id, pd->size_cache[end_id]);
+   #endif
    EINA_SAFETY_ON_FALSE_RETURN(cache_access(obj, pd, start_id) <= relevant_space_size);
    EINA_SAFETY_ON_FALSE_RETURN(cache_access(obj, pd, end_id) >= relevant_space_size + relevant_viewport);
    EINA_SAFETY_ON_FALSE_RETURN(start_id < end_id);
 
+   //to performance optimize the whole widget, we are setting the objects that are outside the viewport to visibility false
+   //The code below ensures that things outside the viewport are always hidden, and things inside the viewport are visible
    if (end_id < pd->prev_run.start_id || start_id > pd->prev_run.end_id)
      {
         vis_change_segment(pd, pd->prev_run.start_id, pd->prev_run.end_id, EINA_FALSE);
@@ -189,6 +205,7 @@ position_content(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
 
         eina_accessor_data_get(pd->size_acc, i, (void**) &size);
         eina_accessor_data_get(pd->content_acc, i, (void**) &ent);
+        //FIXME implement align and padding
         if (pd->dir == EFL_UI_LAYOUT_ORIENTATION_VERTICAL)
           geom.h = size.h;
         else
@@ -207,10 +224,10 @@ position_content(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
 EOLIAN static void
 _efl_ui_list_position_manager_efl_ui_item_position_manager_data_access_set(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, Eina_Accessor *content_access, Eina_Accessor *size_access, int size)
 {
+   cache_invalidate(obj, pd);
    pd->content_acc = content_access;
    pd->size_acc = size_access;
    pd->size = size;
-   cache_invalidate(obj, pd);
 }
 
 EOLIAN static void
@@ -293,7 +310,6 @@ _efl_ui_list_position_manager_efl_ui_item_position_manager_position_single_item(
 EOLIAN static void
 _efl_ui_list_position_manager_efl_ui_item_position_manager_item_size_changed(Eo *obj, Efl_Ui_List_Position_Manager_Data *pd, int index EINA_UNUSED, Efl_Gfx_Entity *subobj EINA_UNUSED)
 {
-   //FIXME this needs a better solution
    cache_invalidate(obj, pd);
    recalc_absolut_size(obj, pd);
    position_content(obj, pd);
@@ -304,9 +320,11 @@ EOLIAN static void
 _efl_ui_list_position_manager_efl_ui_layout_orientable_orientation_set(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, Efl_Ui_Layout_Orientation dir)
 {
    pd->dir = dir;
+   //in order to reset the state of the visible items, just hide everything and set the old segment accordingly
    vis_change_segment(pd, pd->prev_run.start_id, pd->prev_run.end_id, EINA_FALSE);
    pd->prev_run.start_id = 0;
    pd->prev_run.end_id = 0;
+
    cache_invalidate(obj, pd);
    cache_require(obj,pd);
    recalc_absolut_size(obj, pd);
@@ -324,6 +342,7 @@ _efl_ui_list_position_manager_efl_gfx_arrangement_content_align_set(Eo *obj EINA
 {
    pd->align.x = align_vert;
    pd->align.y = align_horiz;
+   position_content(obj, pd);
 }
 
 EOLIAN static void
@@ -341,6 +360,7 @@ _efl_ui_list_position_manager_efl_gfx_arrangement_content_padding_set(Eo *obj EI
    pd->padding.x = pad_vert;
    pd->padding.y = pad_horiz;
    pd->padding.scalable = scalable;
+   position_content(obj, pd);
 }
 
 EOLIAN static void
