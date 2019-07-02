@@ -202,7 +202,7 @@ position_content(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
 
         eina_accessor_data_get(pd->size_acc, i, (void**) &size);
         eina_accessor_data_get(pd->content_acc, i, (void**) &ent);
-        //FIXME implement align and padding
+
         if (pd->dir == EFL_UI_LAYOUT_ORIENTATION_VERTICAL)
           geom.h = size.h;
         else
