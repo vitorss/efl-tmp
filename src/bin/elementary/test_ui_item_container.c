@@ -68,7 +68,7 @@ void test_efl_ui_item_container(void *data EINA_UNUSED,
 
    Eo *list = efl_new(EFL_UI_LIST_POSITION_MANAGER_CLASS);
    item_container = o = efl_add(EFL_UI_ITEM_CONTAINER_CLASS, win,
-                 efl_ui_item_container_layouter_set(efl_added, list));
+                 efl_ui_item_container_position_manager_set(efl_added, list));
    for (int i = 0; i < 2000; ++i)
      {
         char buf[PATH_MAX];
@@ -140,7 +140,7 @@ void test_efl_ui_item_container_update_speed(void *data EINA_UNUSED,
 
    Eo *list = efl_new(EFL_UI_LIST_POSITION_MANAGER_CLASS);
    o = efl_add(EFL_UI_ITEM_CONTAINER_CLASS, win,
-                 efl_ui_item_container_layouter_set(efl_added, list),
+                 efl_ui_item_container_position_manager_set(efl_added, list),
                  efl_ui_layout_orientation_set(efl_added, EFL_UI_LAYOUT_ORIENTATION_VERTICAL));
    printf("Building 20'000 Elements this takes a while:\n");
    for (int i = 0; i < 20000; ++i)

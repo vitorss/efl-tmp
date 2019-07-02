@@ -67,5 +67,6 @@ interface @beta Efl.Ui.Item_Position_Manager extends Efl.Gfx.Arrangement, Efl.Ui
    }
    events {
      content_size,changed : Eina.Size2D; [[called when the absolut size of all contents has changed, this can be used to resize the pan object]]
+     content_min_size,changed : Eina.Size2D; [[emitted when the minsize of this item position manager changed ]]
    }
 }

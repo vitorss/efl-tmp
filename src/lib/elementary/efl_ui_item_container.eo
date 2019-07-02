@@ -7,29 +7,35 @@ class @beta Efl.Ui.Item_Container extends Efl.Ui.Layout_Base implements
                    Efl.Ui.Multi_Selectable,
                    Efl.Gfx.Arrangement
 {
-   [[Simple grid widget with Pack interface.]]
+   [[This widget can be used to define a set of items that needs to be displayed.
+
+     The policy for selecting items can be controlled via $select_mode. The selected items can be received by $selected_items_get.
+     The concrete placement of the items depends on the $position_manager object.
+   ]]
    event_prefix:efl_ui;
    methods {
       item_scroll {
-         [[scroll move the item to show in the viewport.]]
+         [[Bring the passed item into the viewport.]]
          params {
-            @in item: Efl.Ui.Item; [[Target item.]]
-            @in animation: bool; [[Boolean value for animation of scroll move.]]
+            @in item: Efl.Ui.Item; [[The target to move in.]]
+            @in animation: bool; [[If you want to have an animation or not.]]
          }
       }
       item_scroll_align {
-         [[scroll move the item to show at the align position of the viewport.]]
+         [[Bring the passed item into the viewport, place the item accordingly to align in the viewport]]
          params {
-            @in item: Efl.Ui.Item; [[Target item.]]
-            @in align: double; [[align value in Viewport.]]
-            @in animation: bool; [[Boolean value for animation of scroll move.]]
+            @in item: Efl.Ui.Item; [[The target to move in.]]
+            @in align: double; [[0.0 to have this item at the upper or left side of the viewport, 1.0 to have this item at the lower or right side of the viewport]]
+            @in animation: bool; [[If you want to have an animation or not.]]
          }
       }
       @property last_selected_item {
-         [[Property data of last selected item.]]
+         [[The item that was selected the most recent.
+           No other item has been selected while this one was selected.
+         ]]
          get {}
          values {
-            item: Efl.Ui.Item; [[last selected item of grid.]]
+            item: Efl.Ui.Item; [[The latest selected item.]]
          }
       }
       selected_items_get {
@@ -37,33 +43,27 @@ class @beta Efl.Ui.Item_Container extends Efl.Ui.Layout_Base implements
          return: iterator<Efl.Ui.Item> @owned @no_unused; [[Iterator covered by selected items list.
                                                                  user have to free the iterator after used.]]
       }
-      @property layouter {
+      @property position_manager {
+         [[The position manager that handes the placement of items of this object.]]
          values {
-            layouter : Efl.Ui.Item_Position_Manager; //not existing
+            position_manager : Efl.Ui.Item_Position_Manager @owned; [[The objects ownership is passed to the item container.]]
          }
       }
    }
    implements {
-      //Efl.Object
       Efl.Object.constructor;
       Efl.Object.finalize;
       Efl.Object.destructor;
       Efl.Object.invalidate;
-
-      //Efl.Container
       Efl.Container.content_iterate;
       Efl.Container.content_count;
-
       Efl.Ui.Layout_Orientable.orientation { get; set; }
       Efl.Ui.Widget.theme_apply;
-
-      //Efl.Pack
       Efl.Pack.pack_clear;
       Efl.Pack.unpack_all;
       Efl.Pack.unpack;
       Efl.Pack.pack;
       Efl.Pack_Linear.pack_end;
-
       Efl.Pack_Linear.pack_begin;
       Efl.Pack_Linear.pack_before;
       Efl.Pack_Linear.pack_after;
@@ -73,19 +73,15 @@ class @beta Efl.Ui.Item_Container extends Efl.Ui.Layout_Base implements
       Efl.Pack_Linear.pack_content_get;
       Efl.Gfx.Arrangement.content_padding { get; set; }
       Efl.Gfx.Arrangement.content_align { get; set; }
-
-      //Efl.Ui.Scrollable
       Efl.Ui.Scrollable_Interactive.match_content { set; }
-
-      //Efl.Ui.Multi_Selectable
       Efl.Ui.Multi_Selectable.select_mode {get; set;}
    }
    events {
-      item,pressed : Efl.Ui.Item;
-      item,unpressed : Efl.Ui.Item;
-      item,longpressed : Efl.Ui.Item;
-      item,clicked : Efl.Ui.Item;
-      item,clicked,any : Efl.Ui.Item;
+      item,pressed : Efl.Ui.Item; [[A item was pressed]]
+      item,unpressed : Efl.Ui.Item; [[A item was unpressed]]
+      item,longpressed : Efl.Ui.Item; [[A item was longpressed]]
+      item,clicked : Efl.Ui.Item; [[A item was clicked with the primary mouse button]]
+      item,clicked,any : Efl.Ui.Item; [[A item was clicked]]
    }
    composite {
       Efl.Ui.Scrollable_Interactive;

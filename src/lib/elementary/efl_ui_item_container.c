@@ -266,7 +266,6 @@ _efl_ui_item_container_efl_object_constructor(Eo *obj, Efl_Ui_Item_Container_Dat
    efl_ui_mirrored_set(pd->smanager, efl_ui_mirrored_get(obj));
    efl_ui_scroll_manager_pan_set(pd->smanager, pd->pan);
 
-   elm_layout_sizing_eval(obj);
    efl_ui_scroll_connector_bind(obj, pd->smanager);
 
    return o;
@@ -373,11 +372,11 @@ _efl_ui_item_container_efl_ui_scrollable_interactive_match_content_set(Eo *obj E
    if (pd->match_content.w == w && pd->match_content.h == h)
      return;
 
+   //FIXME how does that work
    pd->match_content.w = w;
    pd->match_content.h = h;
 
    efl_ui_scrollable_match_content_set(pd->smanager, w, h);
-   elm_layout_sizing_eval(obj);
 }
 
 static void
@@ -667,25 +666,38 @@ _pos_content_size_changed_cb(void *data, const Efl_Event *ev)
    efl_gfx_entity_size_set(pd->sizer, *size);
 }
 
+static void
+_pos_content_min_size_changed_cb(void *data EINA_UNUSED, const Efl_Event *ev)
+{
+   Eina_Size2D *size = ev->info;
+
+   efl_gfx_hint_size_min_set(data, *size);
+}
+
+EFL_CALLBACKS_ARRAY_DEFINE(pos_manager_cbs,
+  {EFL_UI_ITEM_POSITION_MANAGER_EVENT_CONTENT_SIZE_CHANGED, _pos_content_size_changed_cb},
+  {EFL_UI_ITEM_POSITION_MANAGER_EVENT_CONTENT_MIN_SIZE_CHANGED, _pos_content_min_size_changed_cb},
+)
+
 EOLIAN static void
-_efl_ui_item_container_layouter_set(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Ui_Item_Position_Manager *layouter)
+_efl_ui_item_container_position_manager_set(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Ui_Item_Position_Manager *layouter)
 {
    if (pd->pos_man)
      {
-        efl_event_callback_del(pd->pos_man, EFL_UI_ITEM_POSITION_MANAGER_EVENT_CONTENT_SIZE_CHANGED, _pos_content_size_changed_cb, obj);
+        efl_event_callback_array_del(pd->pos_man, pos_manager_cbs(), obj);
         efl_ui_item_position_manager_data_access_set(pd->pos_man, NULL, NULL, 0);
      }
    pd->pos_man = layouter;
    if (pd->pos_man)
      {
-        efl_event_callback_add(pd->pos_man, EFL_UI_ITEM_POSITION_MANAGER_EVENT_CONTENT_SIZE_CHANGED, _pos_content_size_changed_cb, obj);
+        efl_event_callback_array_add(pd->pos_man, pos_manager_cbs(), obj);
         efl_ui_item_position_manager_data_access_set(pd->pos_man, &pd->obj_accessor.pass_on, &pd->size_accessor, eina_list_count(pd->items));
         efl_ui_item_position_manager_viewport_set(pd->pos_man, efl_ui_scrollable_viewport_geometry_get(obj));
      }
 }
 
 EOLIAN static Efl_Ui_Item_Position_Manager*
-_efl_ui_item_container_layouter_get(const Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd)
+_efl_ui_item_container_position_manager_get(const Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd)
 {
   return pd->pos_man;
 }

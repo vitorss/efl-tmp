@@ -22,6 +22,7 @@ typedef struct {
    Efl_Ui_Layout_Orientation dir;
    int *size_cache;
    int average_item_size;
+   int maximum_min_size;
    struct {
       unsigned int start_id, end_id;
    } prev_run;
@@ -42,17 +43,27 @@ cache_require(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
 
    pd->size_cache = calloc(pd->size + 1, sizeof(int));
    pd->size_cache[0] = 0;
+   pd->maximum_min_size = 0;
+
    for (i = 0; i < pd->size; ++i)
      {
         Eina_Size2D size;
         int step;
+        int min;
 
         eina_accessor_data_get(pd->size_acc, i, (void**) &size);
         if (pd->dir == EFL_UI_LAYOUT_ORIENTATION_VERTICAL)
-          step = size.h;
+          {
+             step = size.h;
+             min = size.w;
+          }
         else
-          step = size.w;
+          {
+             step = size.w;
+             min = size.h;
+          }
         pd->size_cache[i + 1] = pd->size_cache[i] + step;
+        pd->maximum_min_size = MAX(pd->maximum_min_size, min);
      }
    pd->average_item_size = pd->size_cache[pd->size]/pd->size;
 }
@@ -75,6 +86,7 @@ cache_access(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, unsigne
 static void
 recalc_absolut_size(Eo *obj, Efl_Ui_List_Position_Manager_Data *pd)
 {
+   Eina_Size2D min_size = EINA_SIZE2D(-1, -1);
    cache_require(obj, pd);
 
    pd->abs_size = pd->viewport.size;
@@ -88,6 +100,17 @@ recalc_absolut_size(Eo *obj, Efl_Ui_List_Position_Manager_Data *pd)
      }
 
    efl_event_callback_call(obj, EFL_UI_ITEM_POSITION_MANAGER_EVENT_CONTENT_SIZE_CHANGED, &pd->abs_size);
+
+   if (pd->dir == EFL_UI_LAYOUT_ORIENTATION_VERTICAL)
+     {
+        min_size.w = pd->maximum_min_size;
+     }
+   else
+     {
+        min_size.h = pd->maximum_min_size;
+     }
+
+   efl_event_callback_call(obj, EFL_UI_ITEM_POSITION_MANAGER_EVENT_CONTENT_MIN_SIZE_CHANGED, &min_size);
 }
 
 static inline void

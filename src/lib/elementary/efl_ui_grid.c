@@ -515,7 +515,6 @@ _efl_ui_grid_elm_layout_sizing_eval(Eo *obj, Efl_Ui_Grid_Data *pd)
 
    ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd);
 
-
    min = efl_gfx_hint_size_combined_min_get(obj);
    max = efl_gfx_hint_size_max_get(obj);
    efl_gfx_hint_weight_get(obj, &xw, &yw);
