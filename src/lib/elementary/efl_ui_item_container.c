@@ -478,6 +478,12 @@ register_item(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Ui_Item *item)
 static Eina_Bool
 unregister_item(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Ui_Item *item)
 {
+   if (!eina_list_data_find(pd->items, item))
+     {
+        ERR("Item %p is not part of this widget", item);
+        return EINA_FALSE;
+     }
+
    if (!efl_ui_widget_sub_object_del(obj, item))
      return EINA_FALSE;
 
@@ -597,15 +603,17 @@ _efl_ui_item_container_efl_pack_linear_pack_after(Eo *obj, Efl_Ui_Item_Container
 EOLIAN static Eina_Bool
 _efl_ui_item_container_efl_pack_linear_pack_at(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Gfx_Entity *subobj, int index)
 {
-   Eina_List *subobj_list = eina_list_data_find_list(pd->items, subobj);
-   EINA_SAFETY_ON_NULL_RETURN_VAL(subobj_list, EINA_FALSE);
-   int clamp = clamp_index(pd, index);
+   Eina_List *subobj_list;
+   int clamp;
 
+   clamp = clamp_index(pd, index);
    index = index_adjust(pd, index);
+   subobj_list = eina_list_nth_list(pd->items, index);
+   EINA_SAFETY_ON_NULL_RETURN_VAL(subobj_list, EINA_FALSE);
    if (!register_item(obj, pd, subobj))
      return EINA_FALSE;
    if (clamp == 0)
-     pd->items = eina_list_prepend_relative(pd->items, subobj, subobj_list);
+     pd->items = eina_list_prepend_relative_list(pd->items, subobj, subobj_list);
    else if (clamp == 1)
      pd->items = eina_list_append(pd->items, subobj);
    else
