@@ -24,15 +24,6 @@ typedef struct {
    Efl_Ui_Select_Mode mode;
    Efl_Ui_Layout_Orientation dir;
    Eina_Size2D content_min_size;
-   struct {
-     double horizontal;
-     double vertical;
-     double scalable;
-   } padding;
-   struct {
-     double horizontal;
-     double vertical;
-   } align;
    Efl_Ui_Item_Position_Manager *pos_man;
    struct {
       Eina_Accessor pass_on;
@@ -343,42 +334,6 @@ EOLIAN static Efl_Ui_Layout_Orientation
 _efl_ui_item_container_efl_ui_layout_orientable_orientation_get(const Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd)
 {
    return pd->dir;
-}
-
-EOLIAN static void
-_efl_ui_item_container_efl_gfx_arrangement_content_padding_set(Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd, double pad_horiz, double pad_vert, Eina_Bool scalable)
-{
-   pd->padding.horizontal = pad_horiz;
-   pd->padding.vertical = pad_vert;
-   efl_gfx_arrangement_content_padding_set(pd->pos_man, pad_horiz, pad_vert, scalable);
-}
-
-EOLIAN static void
-_efl_ui_item_container_efl_gfx_arrangement_content_padding_get(const Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd, double *pad_horiz, double *pad_vert, Eina_Bool *scalable)
-{
-   if (pad_horiz)
-     *pad_horiz = pd->padding.horizontal;
-   if (pad_vert)
-     *pad_vert = pd->padding.vertical;
-   if (scalable)
-     *scalable = pd->padding.scalable;
-}
-
-EOLIAN static void
-_efl_ui_item_container_efl_gfx_arrangement_content_align_set(Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd, double align_horiz, double align_vert)
-{
-   pd->align.horizontal = align_horiz;
-   pd->align.vertical = align_vert;
-   efl_gfx_arrangement_content_align_set(pd->pos_man, align_horiz, align_vert);
-}
-
-EOLIAN static void
-_efl_ui_item_container_efl_gfx_arrangement_content_align_get(const Eo *obj EINA_UNUSED, Efl_Ui_Item_Container_Data *pd, double *align_horiz, double *align_vert)
-{
-   if (align_horiz)
-     *align_horiz = pd->align.horizontal;
-   if (align_vert)
-     *align_vert = pd->align.vertical;
 }
 
 EOLIAN static void

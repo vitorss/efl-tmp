@@ -15,10 +15,7 @@ typedef struct {
    unsigned int size;
    Eina_Rect viewport;
    Eina_Size2D abs_size;
-   Eina_Vector2 scroll_position, align;
-   struct {
-      double x, y, scalable;
-   } padding;
+   Eina_Vector2 scroll_position;
    Efl_Ui_Layout_Orientation dir;
    int *size_cache;
    int average_item_size;
@@ -335,43 +332,6 @@ EOLIAN static Efl_Ui_Layout_Orientation
 _efl_ui_list_position_manager_efl_ui_layout_orientable_orientation_get(const Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd)
 {
    return pd->dir;
-}
-
-EOLIAN static void
-_efl_ui_list_position_manager_efl_gfx_arrangement_content_align_set(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, double align_horiz, double align_vert)
-{
-   pd->align.x = align_vert;
-   pd->align.y = align_horiz;
-   position_content(obj, pd);
-}
-
-EOLIAN static void
-_efl_ui_list_position_manager_efl_gfx_arrangement_content_align_get(const Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, double *align_horiz, double *align_vert)
-{
-   if (*align_vert)
-     *align_vert = pd->align.x;
-   if (*align_horiz)
-     *align_horiz = pd->align.y;
-}
-
-EOLIAN static void
-_efl_ui_list_position_manager_efl_gfx_arrangement_content_padding_set(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, double pad_horiz, double pad_vert, Eina_Bool scalable)
-{
-   pd->padding.x = pad_vert;
-   pd->padding.y = pad_horiz;
-   pd->padding.scalable = scalable;
-   position_content(obj, pd);
-}
-
-EOLIAN static void
-_efl_ui_list_position_manager_efl_gfx_arrangement_content_padding_get(const Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, double *pad_horiz, double *pad_vert, Eina_Bool *scalable)
-{
-   if (*pad_vert)
-     *pad_vert = pd->padding.x;
-   if (*pad_horiz)
-     *pad_horiz = pd->padding.y;
-   if (*scalable)
-     *scalable = pd->padding.scalable;
 }
 
 #include "efl_ui_list_position_manager.eo.c"
