@@ -41,16 +41,15 @@ _change_min_size_cb(void *data EINA_UNUSED, const Efl_Event *ev)
 
    EINA_SAFETY_ON_NULL_RETURN(element_0);
 
-   if (b)
+   if (!b)
      {
-        b = EINA_FALSE;
         efl_gfx_hint_size_min_set(element_0, EINA_SIZE2D(40, 200));
      }
    else
      {
-        b = EINA_TRUE;
         efl_gfx_hint_size_min_set(element_0, EINA_SIZE2D(40, 40));
      }
+   b = !b;
 }
 
 typedef struct {
