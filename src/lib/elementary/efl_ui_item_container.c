@@ -23,6 +23,7 @@ typedef struct {
    Eina_List *items;
    Efl_Ui_Select_Mode mode;
    Efl_Ui_Layout_Orientation dir;
+   Eina_Size2D content_min_size;
    struct {
      double horizontal;
      double vertical;
@@ -47,6 +48,20 @@ typedef struct {
 
 static Eina_Bool register_item(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Ui_Item *item);
 static Eina_Bool unregister_item(Eo *obj, Efl_Ui_Item_Container_Data *pd, Efl_Ui_Item *item);
+
+static void
+flush_min_size(Eo *obj, Efl_Ui_Item_Container_Data *pd)
+{
+   Eina_Size2D tmp = pd->content_min_size;
+
+   if (!pd->match_content.w)
+     tmp.w = -1;
+
+   if (!pd->match_content.h)
+     tmp.h = -1;
+
+   efl_gfx_hint_size_min_set(obj, tmp);
+}
 
 static int
 clamp_index(Efl_Ui_Item_Container_Data *pd, int index)
@@ -372,7 +387,6 @@ _efl_ui_item_container_efl_ui_scrollable_interactive_match_content_set(Eo *obj E
    if (pd->match_content.w == w && pd->match_content.h == h)
      return;
 
-   //FIXME how does that work
    pd->match_content.w = w;
    pd->match_content.h = h;
 
@@ -670,8 +684,11 @@ static void
 _pos_content_min_size_changed_cb(void *data EINA_UNUSED, const Efl_Event *ev)
 {
    Eina_Size2D *size = ev->info;
+   MY_DATA_GET(data, pd);
 
-   efl_gfx_hint_size_min_set(data, *size);
+   pd->content_min_size = *size;
+
+   flush_min_size(data, pd);
 }
 
 EFL_CALLBACKS_ARRAY_DEFINE(pos_manager_cbs,

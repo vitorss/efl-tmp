@@ -34,7 +34,7 @@ _scroll_to_cb(void *data, const Efl_Event *ev)
 }
 
 static void
-_change_min_size_cb(void *data, const Efl_Event *ev)
+_change_min_size_cb(void *data EINA_UNUSED, const Efl_Event *ev)
 {
    static Eina_Bool b = EINA_FALSE;
    Efl_Ui_Widget *element_0 = efl_key_data_get(ev->object, "__to_element");
@@ -53,11 +53,35 @@ _change_min_size_cb(void *data, const Efl_Event *ev)
      }
 }
 
+typedef struct {
+  Efl_Ui_Check *v, *h;
+  Efl_Ui_Item_Container *c;
+} Match_Content_Ctx;
+
+static void
+_selection_changed_match_content_cb(void *data, const Efl_Event *ev EINA_UNUSED)
+{
+   Match_Content_Ctx *c = data;
+   Eina_Bool v,h;
+
+   v = efl_ui_check_selected_get(c->v);
+   h = efl_ui_check_selected_get(c->h);
+
+   efl_ui_scrollable_match_content_set(c->c, v, h);
+}
+
+static void
+_widget_del_cb(void *data, const Efl_Event *ev EINA_UNUSED)
+{
+   free(data);
+}
+
 void test_efl_ui_item_container(void *data EINA_UNUSED,
                                    Evas_Object *obj EINA_UNUSED,
                                    void *event_info EINA_UNUSED)
 {
    Efl_Ui_Win *win, *o, *tbl, *item_container, *element_1154, *element_10, *element_0;
+   Match_Content_Ctx *ctx = calloc(1, sizeof(*ctx));
 
    win = efl_add(EFL_UI_WIN_CLASS, efl_main_loop_get(),
                  efl_ui_win_type_set(efl_added, EFL_UI_WIN_TYPE_BASIC),
@@ -69,6 +93,7 @@ void test_efl_ui_item_container(void *data EINA_UNUSED,
    Eo *list = efl_new(EFL_UI_LIST_POSITION_MANAGER_CLASS);
    item_container = o = efl_add(EFL_UI_ITEM_CONTAINER_CLASS, win,
                  efl_ui_item_container_position_manager_set(efl_added, list));
+   efl_event_callback_add(o, EFL_EVENT_DEL, _widget_del_cb, ctx);
    for (int i = 0; i < 2000; ++i)
      {
         char buf[PATH_MAX];
@@ -89,6 +114,7 @@ void test_efl_ui_item_container(void *data EINA_UNUSED,
           element_0 = il;
      }
    efl_pack_table(tbl, o, 1, 0, 1, 10);
+   ctx->c = o;
 
    o = efl_add(EFL_UI_CHECK_CLASS, tbl,
            efl_gfx_hint_weight_set(efl_added, 0.0, 0.0),
@@ -122,7 +148,24 @@ void test_efl_ui_item_container(void *data EINA_UNUSED,
    efl_event_callback_add(o, EFL_UI_EVENT_CLICKED, _change_min_size_cb, item_container);
    efl_pack_table(tbl, o, 0, 3, 1, 1);
 
+   o = efl_add(EFL_UI_CHECK_CLASS, tbl,
+           efl_gfx_hint_weight_set(efl_added, 0.0, 0.0),
+           efl_gfx_hint_align_set(efl_added, 0, 0.5));
+   efl_text_set(o, "Match Vertical");
+   efl_event_callback_add(o, EFL_UI_CHECK_EVENT_SELECTED_CHANGED, _selection_changed_match_content_cb, ctx);
+   efl_pack_table(tbl, o, 0, 4, 1, 1);
+   ctx->v = o;
+
+   o = efl_add(EFL_UI_CHECK_CLASS, tbl,
+           efl_gfx_hint_weight_set(efl_added, 0.0, 0.0),
+           efl_gfx_hint_align_set(efl_added, 0, 0.5));
+   efl_text_set(o, "Match Horizontal");
+   efl_event_callback_add(o, EFL_UI_CHECK_EVENT_SELECTED_CHANGED, _selection_changed_match_content_cb, ctx);
+   efl_pack_table(tbl, o, 0, 5, 1, 1);
    efl_gfx_entity_size_set(win, EINA_SIZE2D(260, 200));
+   ctx->h = o;
+
+
 }
 
 void test_efl_ui_item_container_update_speed(void *data EINA_UNUSED,
