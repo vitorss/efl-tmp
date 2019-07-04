@@ -98,9 +98,6 @@ void test_efl_ui_item_container(void *data EINA_UNUSED,
         char buf[PATH_MAX];
         Eo *il = efl_add(EFL_UI_BUTTON_CLASS, o);
 
-        //FIXME wtf this is not required
-        efl_ui_widget_focus_allow_set(il, EINA_FALSE);
-
         snprintf(buf, sizeof(buf), "%d - Test %d", i, i%13);
         efl_gfx_hint_size_min_set(il, EINA_SIZE2D(40, 40+(i%2)*40));
         efl_text_set(il, buf);
