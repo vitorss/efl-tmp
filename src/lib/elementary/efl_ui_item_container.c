@@ -256,7 +256,7 @@ _efl_ui_item_container_efl_object_constructor(Eo *obj, Efl_Ui_Item_Container_Dat
    _size_accessor_init(&pd->size_accessor);
 
    if (!elm_widget_theme_klass_get(obj))
-     elm_widget_theme_klass_set(obj, "grid"); //FIXME this needs its own theme
+     elm_widget_theme_klass_set(obj, "item_container");
 
    o = efl_constructor(efl_super(obj, MY_CLASS));
 
