@@ -127,6 +127,7 @@ vis_change_segment(Efl_Ui_List_Position_Manager_Data *pd, int a, int b, Eina_Boo
         Efl_Gfx_Entity *ent;
 
         eina_accessor_data_get(pd->content_acc, i, (void**) &ent);
+        elm_widget_tree_unfocusable_set(ent, !flag);
         efl_gfx_entity_visible_set(ent, flag);
      }
 }
@@ -248,6 +249,7 @@ EOLIAN static void
 _efl_ui_list_position_manager_efl_ui_item_position_manager_item_added(Eo *obj EINA_UNUSED, Efl_Ui_List_Position_Manager_Data *pd, int added_index EINA_UNUSED, Efl_Gfx_Entity *subobj)
 {
    pd->size ++;
+   elm_widget_tree_unfocusable_set(subobj, EINA_TRUE);
    efl_gfx_entity_visible_set(subobj, EINA_FALSE);
    cache_invalidate(obj, pd);
 }
@@ -257,6 +259,7 @@ _efl_ui_list_position_manager_efl_ui_item_position_manager_item_removed(Eo *obj 
 {
    pd->size --;
    efl_gfx_entity_visible_set(subobj, EINA_TRUE);
+   elm_widget_tree_unfocusable_set(subobj, EINA_FALSE);
    cache_invalidate(obj, pd);
 }
 
