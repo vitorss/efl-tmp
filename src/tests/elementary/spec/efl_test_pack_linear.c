@@ -9,7 +9,7 @@
 
 /* spec-meta-start
       {"test-interface":"Efl.Pack_Linear",
-       "test-widgets": ["Efl.Ui.Box", "Efl.Ui.Grid", "Efl.Ui.Active_View.Container"],
+       "test-widgets": ["Efl.Ui.Box", "Efl.Ui.Grid", "Efl.Ui.Active_View.Container", "Test.Efl.Ui.Item_Container_Grid"],
        "custom-mapping" : {
           "Efl.Ui.Grid" : "EFL_UI_GRID_DEFAULT_ITEM_CLASS"
         }
