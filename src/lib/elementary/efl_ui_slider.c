@@ -784,10 +784,13 @@ _efl_ui_slider_efl_ui_range_interactive_range_step_get(const Eo *obj EINA_UNUSED
 EOLIAN static void
 _efl_ui_slider_efl_ui_range_interactive_range_step_set(Eo *obj EINA_UNUSED, Efl_Ui_Slider_Data *sd, double step)
 {
-   if (sd->step == step) return;
+   if (step <= 0)
+     {
+        ERR("Wrong param. The step(%lf) should be bigger than 0.0", step);
+        return;
+     }
 
-   if (step < 0.0) step = 0.0;
-   else if (step > 1.0) step = 1.0;
+   if (sd->step == step) return;
 
    sd->step = step;
 }
