@@ -719,7 +719,17 @@ _efl_ui_slider_efl_ui_layout_orientable_orientation_get(const Eo *obj EINA_UNUSE
 EOLIAN static void
 _efl_ui_slider_efl_ui_range_display_range_limits_set(Eo *obj, Efl_Ui_Slider_Data *sd, double min, double max)
 {
-   if ((sd->val_min == min) && (sd->val_max == max)) return;
+   if (max < min)
+     {
+        ERR("Wrong params. min(%lf) is bigger than max(%lf).", min, max);
+        return;
+     }
+   if (EINA_DBL_EQ(max, min))
+     {
+        ERR("min and max must have a different value");
+        return;
+     }
+   if ((EINA_DBL_EQ(sd->val_min, min)) && (EINA_DBL_EQ(sd->val_max, max))) return;
    sd->val_min = min;
    sd->val_max = max;
    if (sd->val < sd->val_min) sd->val = sd->val_min;
@@ -738,7 +748,19 @@ _efl_ui_slider_efl_ui_range_display_range_limits_get(const Eo *obj EINA_UNUSED, 
 EOLIAN static void
 _efl_ui_slider_efl_ui_range_display_range_value_set(Eo *obj, Efl_Ui_Slider_Data *sd, double val)
 {
-   if (sd->val == val) return;
+   if (val < sd->val_min)
+     {
+        ERR("Error, value is lower than minimum");
+        return;
+     }
+
+   if (val > sd->val_max)
+     {
+        ERR("Error, value is bigger than maximum");
+        return;
+     }
+
+   if (EINA_DBL_EQ(val, sd->val)) return;
    sd->val = val;
 
    if (sd->val < sd->val_min) sd->val = sd->val_min;
