@@ -593,71 +593,21 @@ _access_spinner_register(Evas_Object *obj, Eina_Bool is_access)
      }
 }
 
-static const char *
-_theme_group_modify_pos_get(const char *cur_group, const char *search, size_t len)
+static void
+sync_widget_theme_klass(Eo *obj, Efl_Ui_Spin_Button_Data *pd)
 {
-   const char *pos = NULL;
-   const char *temp_str = NULL;
-
-   temp_str = cur_group + len - strlen(search);
-   if (temp_str >= cur_group)
-     {
-        if (!strcmp(temp_str, search))
-          pos = temp_str;
-     }
-
-   return pos;
-}
-
-static char *
-_efl_ui_spin_button_theme_group_get(Evas_Object *obj, Efl_Ui_Spin_Button_Data *sd)
-{
-   const char *pos = NULL;
-   const char *cur_group = elm_widget_theme_element_get(obj);
-   Eina_Strbuf *new_group = eina_strbuf_new();
-   size_t len = 0;
-
-   if (cur_group)
-     {
-        len = strlen(cur_group);
-        pos = _theme_group_modify_pos_get(cur_group, "horizontal", len);
-        if (!pos)
-          pos = _theme_group_modify_pos_get(cur_group, "vertical", len);
-
-        // TODO: change separator when it is decided.
-        //       can skip when prev_group == cur_group
-        if (!pos)
-          {
-             eina_strbuf_append(new_group, cur_group);
-             eina_strbuf_append(new_group, "/");
-          }
-        else
-          {
-             eina_strbuf_append_length(new_group, cur_group, pos - cur_group);
-          }
-     }
-
-   if (efl_ui_layout_orientation_is_horizontal(sd->dir, EINA_TRUE))
-     eina_strbuf_append(new_group, "horizontal");
+   if (efl_ui_layout_orientation_is_horizontal(pd->dir, EINA_TRUE))
+     elm_widget_theme_klass_set(obj, "spin_button/horizontal");
    else
-     eina_strbuf_append(new_group, "vertical");
-
-   return eina_strbuf_release(new_group);
+     elm_widget_theme_klass_set(obj, "spin_button/vertical");
 }
-
 
 EOLIAN static Eina_Error
 _efl_ui_spin_button_efl_ui_widget_theme_apply(Eo *obj, Efl_Ui_Spin_Button_Data *sd EINA_UNUSED)
 {
    Eina_Error int_ret = EFL_UI_THEME_APPLY_ERROR_GENERIC;
-   char *group;
 
-   group = _efl_ui_spin_button_theme_group_get(obj, sd);
-   if (group)
-     {
-        elm_widget_theme_element_set(obj, group);
-        free(group);
-     }
+   sync_widget_theme_klass(obj, sd);
 
    int_ret = efl_ui_widget_theme_apply(efl_super(obj, MY_CLASS));
    if (int_ret == EFL_UI_THEME_APPLY_ERROR_GENERIC) return int_ret;
@@ -684,25 +634,22 @@ _efl_ui_spin_button_efl_ui_widget_theme_apply(Eo *obj, Efl_Ui_Spin_Button_Data *
 
 #define INTERVAL 0.85
 
+
 EOLIAN static Eo *
 _efl_ui_spin_button_efl_object_constructor(Eo *obj, Efl_Ui_Spin_Button_Data *sd)
 {
-   char *group;
 
    obj = efl_constructor(efl_super(obj, MY_CLASS));
-   elm_widget_theme_klass_set(obj, "spin_button");
+   sync_widget_theme_klass(obj, sd);
 
    ELM_WIDGET_DATA_GET_OR_RETURN(obj, wd, NULL);
 
-   group = _efl_ui_spin_button_theme_group_get(obj, sd);
    if (elm_widget_theme_object_set(obj, wd->resize_obj,
                                        elm_widget_theme_klass_get(obj),
-                                       group,
+                                       elm_widget_theme_element_get(obj),
                                        elm_widget_theme_style_get(obj)) == EFL_UI_THEME_APPLY_ERROR_GENERIC)
      CRI("Failed to set layout!");
 
-
-   free(group);
 
    sd->inc_button = efl_add(EFL_UI_BUTTON_CLASS, obj,
                             efl_ui_autorepeat_enabled_set(efl_added, EINA_TRUE),
