@@ -499,11 +499,7 @@ _efl_ui_spin_button_efl_ui_focus_object_on_focus_update(Eo *obj, Efl_Ui_Spin_But
    int_ret = efl_ui_focus_object_on_focus_update(efl_super(obj, MY_CLASS));
    if (!int_ret) return EINA_FALSE;
 
-   if (!efl_ui_focus_object_focus_get(obj))
-     {
-        ELM_SAFE_FREE(sd->delay_change_timer, ecore_timer_del);
-     }
-   else
+   if (efl_ui_focus_object_focus_get(obj))
      {
         if (sd->entry_reactivate)
           {
